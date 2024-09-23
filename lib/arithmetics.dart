@@ -22,7 +22,7 @@ class _Arithmetics_ExamplesState extends State<Arithmetics_Examples> {
             padding: const EdgeInsets.all(18.0),
             child: Slider(
               value: _currentSliderValue,
-              min: 2,
+              min: 3,
               max: 10,
               divisions: 5,
               label: _currentSliderValue.round().toString(),
