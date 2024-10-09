@@ -86,7 +86,7 @@ class _NewCalendarState extends State<NewCalendar> {
                         for (int j = 0; j < days[i].length; j++)
                           SingleCell(
                             date: days[i][j],
-                            selectedMonth: _currentDate!.month,
+                            currentDate: currentDate,
                           ),
                       ],
                     )
@@ -101,14 +101,14 @@ class _NewCalendarState extends State<NewCalendar> {
                   IconButton(
                       onPressed: () {
                         setState(() {
-                          _currentDate = _currentDate?.subtract(Duration(days: 30));
+                          _currentDate = DateTime(_currentDate!.year , _currentDate!.month-1);
                         });
                       },
                       icon: Icon(Icons.arrow_left)),
                   IconButton(
                       onPressed: () {
                         setState(() {
-                          _currentDate = _currentDate?.add(Duration(days: 30));
+                          _currentDate = DateTime(_currentDate!.year , _currentDate!.month+1);
                         });
                       },
                       icon: Icon(Icons.arrow_right)),
@@ -123,17 +123,24 @@ class _NewCalendarState extends State<NewCalendar> {
 }
 
 class SingleCell extends StatelessWidget {
-  const SingleCell({super.key, required this.date, required this.selectedMonth});
+  const SingleCell({super.key, required this.date, required this.currentDate, });
 
   final DateTime date;
-  final int selectedMonth; 
+  final DateTime currentDate;
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size.width;
-    
+    bool isCurrentMonth = date.year == currentDate.year && date.month == currentDate.month;
+
     return Container(
-      
-      width: size /8,
-      child: Text(date.day.toString()),);
+      width: size / 8,
+      color: isCurrentMonth ? Colors.black : Colors.blue, 
+      child: Center(
+        child: Text(
+          date.day.toString(),
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 }
