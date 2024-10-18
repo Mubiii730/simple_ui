@@ -3,19 +3,23 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:simple_ui/Hive_task_assignment.dart';
 import 'package:simple_ui/Hive_task_calendar.dart';
+import 'package:simple_ui/Map_Example.dart';
 import 'package:simple_ui/indexPractice.dart';
 import 'package:simple_ui/index_problem.dart';
+import 'package:simple_ui/textfield_with_hive.dart';
 
 void main() async{
-  //  await Hive.initFlutter();
-  // await Hive.openBox('tasksBox'); 
+  //   await Hive.initFlutter();
+  //  await Hive.openBox('tasksBox'); 
+   
+  //await Hive.openBox('myBox'); 
   runApp(
  
    
-    // const  MaterialApp(
+    const  MaterialApp(
 
-    //   home: 
-      MyApp()
+      home: 
+      MapExample()
       
     //   theme: ThemeData(
        
@@ -30,6 +34,6 @@ void main() async{
     //   // home: CopyCalendar(
     //   //   startDate: DateTime.now(),
     //   // ),
-    //  ),
+     ),
   );
 }
