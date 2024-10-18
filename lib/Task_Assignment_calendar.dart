@@ -1,4 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
+
+// part 'task.g.dart';
+
+@HiveType(typeId: 0)
+class Task {
+  @HiveField(0)
+  final String title;
+
+  @HiveField(1)
+  final DateTime date;
+
+  Task(this.title, this.date);
+}
+
 
 class CheckCalendar extends StatefulWidget {
   const CheckCalendar({super.key, this.startDate});
@@ -10,6 +28,7 @@ class CheckCalendar extends StatefulWidget {
 
 class _CheckCalendarState extends State<CheckCalendar> {
   DateTime? _currentDate;
+  Box<Task>? _taskBox;
 
   var monthNames = [
     'Jan',
@@ -33,7 +52,31 @@ class _CheckCalendarState extends State<CheckCalendar> {
   Map<DateTime, List<String>> tasksMap = {};
   Map<DateTime, TextEditingController> controllersMap = {};
 
-  void _addItem(DateTime date) {
+ @override
+  void initState() {
+    super.initState();
+    _initializeHive();
+  }
+
+  Future<void> _initializeHive() async {
+    final directory = await getApplicationDocumentsDirectory();
+    Hive.init(directory.path);
+    // Hive.registerAdapter(TaskAdapter());
+    _taskBox = await Hive.openBox<Task>('tasks');
+    _loadTasks();
+  }
+
+  void _loadTasks() {
+    for (var task in _taskBox!.values) {
+      if (!tasksMap.containsKey(task.date)) {
+        tasksMap[task.date] = [];
+      }
+      tasksMap[task.date]!.add(task.toString());
+    }
+    setState(() {});
+  }
+
+void _addItem(DateTime date) {
     final controller = controllersMap[date];
     if (controller != null && controller.text.isNotEmpty) {
       setState(() {
@@ -57,15 +100,27 @@ class _CheckCalendarState extends State<CheckCalendar> {
     var startFrom = getStartOfMonth(currentDate).subtract(Duration(
       days: getStartOfMonth(currentDate).weekday,
     ));
-
-    for (var i = 0; i < 5; i++) {
-      var list = <DateTime>[];
-      for (var j = 0; j < 7; j++) {
-        list.add(startFrom);
-        controllersMap[startFrom] = TextEditingController();
-        startFrom = startFrom.add(const Duration(days: 1));
+    var startFrom_later=startFrom;
+    if (startFrom.day > 27 || startFrom.day <= 7)
+      for (var i = 0; i < 5; i++) {
+        var list = <DateTime>[];
+        for (var j = 0; j < 7; j++) {
+          list.add(startFrom);
+          controllersMap[startFrom] = TextEditingController();
+          startFrom = startFrom.add(const Duration(days: 1));
+        }
+        days.add(list);
       }
-      days.add(list);
+    else {
+      for (var i = 0; i < 6; i++) {
+        var list = <DateTime>[];
+        for (var j = 0; j < 7; j++) {
+          list.add(startFrom);
+          controllersMap[startFrom] = TextEditingController();
+          startFrom = startFrom.add(const Duration(days: 1));
+        }
+        days.add(list);
+      }
     }
 
     return Scaffold(
@@ -138,7 +193,6 @@ class _CheckCalendarState extends State<CheckCalendar> {
                               SingleCell1(
                                 date: days[i][j],
                                 currentDate: currentDate,
-                               
                               )
                           ],
                         )
@@ -147,79 +201,160 @@ class _CheckCalendarState extends State<CheckCalendar> {
                 ],
               ),
             ),
-            Container(
-              width: availableWidth - availableWidth / 3,
-              height: availableHeight - availableHeight / 12,
-              color: Colors.black,
-              child: Column(
-                children: [
-                  Center(
-                    child: Text(
-                      monthNames[_currentDate!.month - 1] +
-                          ' ' +
-                          '${_currentDate!.year}',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17),
+            if (startFrom_later.day > 27 || startFrom_later.day <= 7)
+              Container(
+                width: availableWidth - availableWidth / 3,
+                height: availableHeight - availableHeight / 12,
+                color: Colors.black,
+                child: Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        monthNames[_currentDate!.month - 1] +
+                            ' ' +
+                            '${_currentDate!.year}',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17),
+                      ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
-                        .map(
-                          (x) => Container(
-                            height: MediaQuery.sizeOf(context).height / 20,
-                            child: Center(
-                              child: Text(
-                                x,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: size,
-                                    color: Colors.white),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
+                          .map(
+                            (x) => Container(
+                              height: MediaQuery.sizeOf(context).height / 20,
+                              child: Center(
+                                child: Text(
+                                  x,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: size,
+                                      color: Colors.white),
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (int i = 0; i < 5; i++)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            for (int j = 0; j < 7; j++)
-                              Column(
-                                children: [
-                                  Container(
-                                      width: availableWidth / 12,
-                                      height: availableHeight / 7,
-                                      color: Colors.blue,
-                                      child: Column(
-                                        children: [
-                                          SingleCell(
-                                            date: days[i][j],
-                                            currentDate: currentDate,
-                                            tasks: tasksMap[days[i][j]] ?? [],
-                                            onAddTask: () => _addItem(days[i][j]),
-                                            controller: controllersMap[days[i][j]]!,
-                                          ),
-                                        ],
-                                      )),
-                                  SizedBox(
-                                    height: 20,
+                          )
+                          .toList(),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (startFrom.day > 27 || startFrom.day <= 7)
+                          for (int i = 0; i < 5; i++)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                for (int j = 0; j < 7; j++)
+                                  Column(
+                                    children: [
+                                      Container(
+                                          width: availableWidth / 12,
+                                          height: availableHeight / 7,
+                                          color: Colors.blue,
+                                          child: Column(
+                                            children: [
+                                              SingleCell(
+                                                date: days[i][j],
+                                                currentDate: currentDate,
+                                                tasks:
+                                                    tasksMap[days[i][j]] ?? [],
+                                                onAddTask: () =>
+                                                    _addItem(days[i][j]),
+                                                controller:
+                                                    controllersMap[days[i][j]]!,
+                                              ),
+                                            ],
+                                          )),
+                                      SizedBox(
+                                        height: 20,
+                                      )
+                                    ],
                                   )
-                                ],
-                              )
-                          ],
-                        )
-                    ],
-                  ),
-                ],
+                              ],
+                            )
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                width: availableWidth - availableWidth / 3,
+                height: availableHeight - availableHeight / 12,
+                color: Colors.black,
+                child: Column(
+                  children: [
+                    Center(
+                      child: Text(
+                        monthNames[_currentDate!.month - 1] +
+                            ' ' +
+                            '${_currentDate!.year}',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
+                          .map(
+                            (x) => Container(
+                              height: MediaQuery.sizeOf(context).height / 20,
+                              child: Center(
+                                child: Text(
+                                  x,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: size,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (int i = 0; i < 6; i++)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              for (int j = 0; j < 7; j++)
+                                Column(
+                                  children: [
+                                    Container(
+                                        width: availableWidth / 12,
+                                        height: availableHeight / (8.5),
+                                        color: Colors.blue,
+                                        child: Column(
+                                          children: [
+                                            SingleCell(
+                                              date: days[i][j],
+                                              currentDate: currentDate,
+                                              tasks: tasksMap[days[i][j]] ?? [],
+                                              onAddTask: () =>
+                                                  _addItem(days[i][j]),
+                                              controller:
+                                                  controllersMap[days[i][j]]!,
+                                            ),
+                                          ],
+                                        )),
+                                    SizedBox(
+                                      height: 20,
+                                    )
+                                  ],
+                                )
+                            ],
+                          )
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            )
           ],
         );
       }),
@@ -261,9 +396,9 @@ class SingleCell extends StatelessWidget {
               style: TextStyle(color: Colors.white),
             ),
             ...tasks.map((task) => Text(
-              task,
-              style: TextStyle(color: Colors.white, fontSize: 10),
-            )),
+                  task,
+                  style: TextStyle(color: Colors.white, fontSize: 10),
+                )),
             SizedBox(
               width: 100,
               height: 35,
@@ -283,10 +418,11 @@ class SingleCell extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: onAddTask,
-              style: ElevatedButton.styleFrom(
-                fixedSize: Size(120, 20)
+              style: ElevatedButton.styleFrom(fixedSize: Size(120, 20)),
+              child: Text(
+                'Add ',
+                style: TextStyle(fontSize: 12),
               ),
-              child: Text('Add ', style: TextStyle(fontSize: 12),),
             ),
           ],
         ),
@@ -300,12 +436,10 @@ class SingleCell1 extends StatelessWidget {
     super.key,
     required this.date,
     this.currentDate,
-   
   });
 
   final DateTime date;
   final currentDate;
- 
 
   @override
   Widget build(BuildContext context) {
@@ -324,9 +458,6 @@ class SingleCell1 extends StatelessWidget {
               date.day.toString(),
               style: TextStyle(color: Colors.white),
             ),
-            
-           
-            
           ],
         ),
       ),

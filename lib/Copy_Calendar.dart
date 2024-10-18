@@ -40,7 +40,8 @@ class _CopyCalendarState extends State<CopyCalendar> {
 
     List<List<DateTime>> days = [];
 
-    for (var i = 0; i < 5; i++) {
+    if(startFrom.day>27){
+      for (var i = 0; i < 5; i++) {
       var list = <DateTime>[];
 
       for (var j = 0; j < 7; j++) {
@@ -49,6 +50,32 @@ class _CopyCalendarState extends State<CopyCalendar> {
       }
       days.add(list);
     }
+    }
+     else if(startFrom.day<=27 && startFrom.day>7){
+      for (var i = 0; i < 6; i++) {
+      var list = <DateTime>[];
+
+      for (var j = 0; j < 7; j++) {
+        list.add(startFrom);
+        startFrom = startFrom.add(Duration(days: 1));
+      }
+      days.add(list);
+    }
+    }
+     else{
+      for (var i = 0; i < 5; i++) {
+      var list = <DateTime>[];
+
+      for (var j = 0; j < 7; j++) {
+        list.add(startFrom);
+        startFrom = startFrom.add(Duration(days: 1));
+      }
+      days.add(list);
+    }
+    }
+
+
+    
 
     return Scaffold(
       body: Center(

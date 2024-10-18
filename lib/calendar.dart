@@ -23,7 +23,7 @@ class _NewCalendarState extends State<NewCalendar> {
   Widget build(BuildContext context) {
     List<List<DateTime>> days = [];
 
-    _currentDate ??= widget.startDate;
+    _currentDate ??= widget.startDate?? DateTime.now();
     
     
 
