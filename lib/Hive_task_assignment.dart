@@ -35,9 +35,9 @@ class _CheckCalendar2HiveState extends State<CheckCalendar2Hive> {
     // tasksMap.clear();
     for (var key in box.keys) {
       DateTime date = DateTime.parse(key);
-      print(date);
+      // print(date);
       tasksMap[date] = List<String>.from(box.get(key) ?? []);
-      print(tasksMap[date]);
+      //print(tasksMap[date]);
     }
   }
 

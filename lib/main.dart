@@ -7,6 +7,7 @@ import 'package:simple_ui/Map_Example.dart';
 import 'package:simple_ui/indexPractice.dart';
 import 'package:simple_ui/index_problem.dart';
 import 'package:simple_ui/textfield_with_hive.dart';
+import 'package:simple_ui/visual_script_example.dart';
 
 void main() async{
   //   await Hive.initFlutter();
@@ -16,10 +17,10 @@ void main() async{
   runApp(
  
    
-    const  MaterialApp(
+    MaterialApp(
 
       home: 
-      MapExample()
+      VisualScriptEditor()
       
     //   theme: ThemeData(
        
